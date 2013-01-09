@@ -66,22 +66,35 @@ HRESULT CStunRequestHandler::ProcessRequest(const StunMessageIn& msgIn, StunMess
     // pre-prep message out
     handler._pMsgOut->socketrole = handler._pMsgIn->socketrole; // output socket is the socket that sent us the message
     handler._pMsgOut->addrDest = handler._pMsgIn->addrRemote; // destination address is same as source
-    
-    // now call the function that does all the real work
-    hr = handler.ProcessRequestImpl();
+
+    hr = handler.ProcessMessage();
     
 Cleanup:
     return hr;
 }
 
-HRESULT CStunRequestHandler::ProcessRequestImpl()
+HRESULT CStunRequestHandler::ProcessMessage()
+{
+    HRESULT hr;
+    CStunMessageReader &reader = *(_pMsgIn->pReader);
+
+    if (reader.GetMessageClass() == StunMsgClassRequest)
+    {
+      // now call the function that does all the real work
+      hr = ProcessRequestImpl(reader);
+    }
+    else if (reader.GetMessageClass() == StunMsgClassIndication)
+    {
+      hr = ProcessRendezvousIndication(reader);
+    }
+
+    return hr;
+}
+
+HRESULT CStunRequestHandler::ProcessRequestImpl(CStunMessageReader &reader)
 {
     HRESULT hrResult = S_OK;
     HRESULT hr = S_OK;
-    
-
-    // aliases
-    CStunMessageReader &reader = *(_pMsgIn->pReader);
     
     uint16_t responseport = 0;
     
@@ -362,6 +375,33 @@ HRESULT CStunRequestHandler::ProcessBindingRequest()
     return S_OK;
 }
 
+HRESULT CStunRequestHandler::ProcessRendezvousIndication(CStunMessageReader &reader)
+{
+    HRESULT hResult;
+    CSocketAddress peerAddress;
+    CStunMessageBuilder builder;
+    
+    hResult = reader.GetXorPeerAddress(&peerAddress);
+    
+    if (SUCCEEDED(hResult))
+    {
+      StunTransactionId txid;
+    
+      _pMsgOut->spBufferOut->SetSize(0);
+      builder.GetStream().Attach(_pMsgOut->spBufferOut, true);
+      builder.AddHeader(StunMsgTypeRendezvous, StunMsgClassIndication);
+      builder.AddRandomTransactionId(&txid);
+      builder.AddXorPeerAddress(_pMsgIn->addrRemote);
+      builder.FixLengthField();
+
+      _pMsgOut->socketrole = RolePP;
+      _pMsgOut->addrDest = peerAddress;
+      
+      return S_OK;
+    }
+    
+    return hResult;
+}
 
 HRESULT CStunRequestHandler::ValidateAuth()
 {

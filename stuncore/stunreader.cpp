@@ -500,6 +500,20 @@ HRESULT CStunMessageReader::GetXorMappedAddress(CSocketAddress* pAddr)
     return hr;
 }
 
+HRESULT CStunMessageReader::GetXorPeerAddress(CSocketAddress* pAddr)
+{
+    HRESULT hr = S_OK;
+    hr = GetAddressHelper(STUN_ATTRIBUTE_XORPEERADDRESS, pAddr);
+    
+    if (SUCCEEDED(hr))
+    {
+        pAddr->ApplyStunXorMap(_transactionid);
+    }
+
+    return hr;
+}
+
+
 HRESULT CStunMessageReader::GetResponseOriginAddress(CSocketAddress* pAddr)
 {
     HRESULT hr = S_OK;

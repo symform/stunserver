@@ -326,6 +326,13 @@ HRESULT CStunMessageBuilder::AddOtherAddress(const CSocketAddress& addr)
     return AddMappedAddressImpl(attribid, addr);
 }
 
+HRESULT CStunMessageBuilder::AddXorPeerAddress(const CSocketAddress& addr)
+{
+    CSocketAddress addrxor(addr);
+    addrxor.ApplyStunXorMap(_transactionid);
+    return AddMappedAddressImpl(STUN_ATTRIBUTE_XORPEERADDRESS, addrxor);
+}
+
 HRESULT CStunMessageBuilder::AddResponsePort(uint16_t port)
 {
 

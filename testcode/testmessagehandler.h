@@ -54,6 +54,7 @@ private:
     
     CSocketAddress _addrLocal;
     CSocketAddress _addrMapped;
+    CSocketAddress _addrPeer;
     CSocketAddress _addrServerPP;
     CSocketAddress _addrServerPA;
     CSocketAddress _addrServerAP;
@@ -72,6 +73,7 @@ private:
     void InitTransportAddressSet(TransportAddressSet& tas, bool fRolePP, bool fRolePA, bool fRoleAP, bool fRoleAA);
     
     HRESULT InitBindingRequest(CStunMessageBuilder& builder);
+    HRESULT InitRendezvousIndication(CStunMessageBuilder& builder);
 
     HRESULT ValidateMappedAddress(CStunMessageReader& reader, const CSocketAddress& addrExpected, bool fLegacyOnly);
     HRESULT ValidateResponseOriginAddress(CStunMessageReader& reader, const CSocketAddress& addrExpected);
@@ -86,6 +88,7 @@ public:
     HRESULT Test2();
     HRESULT Test3();
     HRESULT Test4();
+    HRESULT Test5();
     HRESULT Run();
 
     UT_DECLARE_TEST_NAME("CTestMessageHandler");

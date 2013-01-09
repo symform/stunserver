@@ -47,6 +47,7 @@ const uint16_t STUN_ATTRIBUTE_UNKNOWNATTRIBUTES = 0x000A;
 
 const uint16_t STUN_ATTRIBUTE_REFLECTEDFROM = 0x000B; // old rfc
 
+const uint16_t STUN_ATTRIBUTE_XORPEERADDRESS = 0x0012;
 
 const uint16_t STUN_ATTRIBUTE_REALM = 0x0014;
 const uint16_t STUN_ATTRIBUTE_NONCE = 0x0015;
@@ -102,6 +103,7 @@ enum StunMessageClass
 enum StunMessageType
 {
     StunMsgTypeBinding = 0x0001,
+    StunMsgTypeRendezvous = 0x004D,
     StunMsgTypeInvalid = 0xffff
 };
 

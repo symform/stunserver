@@ -60,6 +60,7 @@ public:
     HRESULT AddMappedAddress(const CSocketAddress& addr);
     HRESULT AddResponseOriginAddress(const CSocketAddress& other);
     HRESULT AddOtherAddress(const CSocketAddress& other);
+    HRESULT AddXorPeerAddress(const CSocketAddress& other);
 
     HRESULT AddResponsePort(uint16_t port);
     HRESULT AddPaddingAttribute(uint16_t paddingSize);

@@ -80,10 +80,12 @@ private:
     
     CStunRequestHandler();
 
+    HRESULT ProcessMessage();
     HRESULT ProcessBindingRequest();
+    HRESULT ProcessRendezvousIndication(CStunMessageReader &reader);
     void BuildErrorResponse();
     HRESULT ValidateAuth();
-    HRESULT ProcessRequestImpl();
+    HRESULT ProcessRequestImpl(CStunMessageReader &reader);
     
     // input
     IStunAuth* _pAuth;

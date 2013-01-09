@@ -34,6 +34,9 @@ static const uint16_t c_portLocal = 2222;
 static const char* c_szIPMapped = "3.3.3.3";
 static const uint16_t c_portMapped = 3333;
 
+static const char* c_szIPPeer = "4.4.4.4";
+static const uint16_t c_portPeer = 4444;
+
 
 
 HRESULT CMockAuthShort::DoAuthCheck(AuthAttributes* pAuthAttributes, AuthResponse *pResponse)
@@ -96,6 +99,7 @@ CTestMessageHandler::CTestMessageHandler()
 
     ToAddr(c_szIPLocal, c_portLocal, &_addrLocal);
     ToAddr(c_szIPMapped, c_portMapped, &_addrMapped);
+    ToAddr(c_szIPPeer, c_portPeer, &_addrPeer);
     
     ToAddr(c_szIPServerPrimary, c_portServerPrimary, &_addrServerPP);
     ToAddr(c_szIPServerPrimary, c_portServerAlternate, &_addrServerPA);
@@ -163,6 +167,16 @@ HRESULT CTestMessageHandler::InitBindingRequest(CStunMessageBuilder& builder)
     StunTransactionId transid;
     builder.AddHeader(StunMsgTypeBinding, StunMsgClassRequest);
     builder.AddRandomTransactionId(&transid);
+    builder.FixLengthField();
+    return S_OK;
+}
+
+HRESULT CTestMessageHandler::InitRendezvousIndication(CStunMessageBuilder& builder)
+{
+    StunTransactionId transid;
+    builder.AddHeader(StunMsgTypeRendezvous, StunMsgClassIndication);
+    builder.AddRandomTransactionId(&transid);
+    builder.AddXorPeerAddress(_addrPeer);
     builder.FixLengthField();
     return S_OK;
 }
@@ -477,6 +491,61 @@ Cleanup:
     return hr;
 }
 
+// Test5 - test rendezvous indication
+HRESULT CTestMessageHandler::Test5()
+{
+    HRESULT hr = S_OK;
+    CStunMessageBuilder builder;
+    CRefCountedBuffer spBuffer, spBufferOut(new CBuffer(MAX_STUN_MESSAGE_SIZE));
+    CStunMessageReader reader;
+    StunMessageIn msgIn;
+    StunMessageOut msgOut;
+    TransportAddressSet tas = {};
+    CSocketAddress addr;
+    
+    InitTransportAddressSet(tas, true, true, true, true);
+    
+    ChkA(InitRendezvousIndication(builder));
+    Chk(builder.GetResult(&spBuffer));
+    
+    ChkIfA(CStunMessageReader::BodyValidated != reader.AddBytes(spBuffer->GetData(), spBuffer->GetSize()), E_FAIL);
+
+    // a message send to the PP socket on the server from the 
+    msgIn.socketrole = RolePP;
+    msgIn.addrRemote = _addrMapped;
+    msgIn.pReader = &reader;
+    msgIn.addrLocal = _addrServerPP;
+    msgIn.fConnectionOriented = false;
+    
+    spBuffer.reset();
+    
+    msgOut.spBufferOut = spBufferOut;
+    msgOut.socketrole = RoleAA; // deliberately wrong - so we can validate if it got changed to RolePP
+    
+    // process the renedezvous request
+    ChkA(CStunRequestHandler::ProcessRequest(msgIn, msgOut, &tas, NULL));
+    
+    reader.Reset();
+    ChkIfA(CStunMessageReader::BodyValidated != reader.AddBytes(spBufferOut->GetData(), spBufferOut->GetSize()), E_FAIL);
+    
+    // validate that the message returned is a success response for a binding request
+    ChkIfA(reader.GetMessageClass() != StunMsgClassIndication, E_FAIL);
+    ChkIfA(reader.GetMessageType() != (uint16_t)StunMsgTypeRendezvous, E_FAIL);
+
+    // validate that the output indication goes out on the primary socket role
+    ChkIfA(msgOut.socketrole != RolePP, E_FAIL);
+
+    // check that it goes to the peer.
+    ChkIfA(msgOut.addrDest.IsSameIP_and_Port(_addrPeer)==false, E_FAIL);
+    
+    // check the peer address attribute is the mapped address.
+    ChkA(reader.GetXorPeerAddress(&addr));
+    ChkIfA(addr.IsSameIP_and_Port(_addrMapped)==false, E_FAIL);
+    
+Cleanup:
+    return hr;
+}
+
 
 HRESULT CTestMessageHandler::Run()
 {
@@ -487,6 +556,7 @@ HRESULT CTestMessageHandler::Run()
     Chk(Test2());
     Chk(Test3());
     Chk(Test4());
+    Chk(Test5());
     
 Cleanup:
     return hr;
