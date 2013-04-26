@@ -15,20 +15,11 @@
 */
 
 
-#include "commonincludes.h"
+#include "commonincludes.hpp"
 #include "refcountobject.h"
 
-int AtomicIncrement(int* pInt)
-{
-    // InterlockedIncrement
-    return __sync_add_and_fetch(pInt, 1);
-}
 
-int AtomicDecrement(int* pInt)
-{
-    // InterlockedDecrement
-    return __sync_sub_and_fetch(pInt, 1);
-}
+#include "atomichelpers.h"
 
 
 CBasicRefCount::CBasicRefCount()

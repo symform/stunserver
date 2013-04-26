@@ -1,5 +1,5 @@
 /*
-   Copyright 2011 John Selbie
+   Copyright 2013 John Selbie
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,31 +15,13 @@
 */
 
 
-
-#ifndef _TESTRECVFROMEX_H
-#define _TESTRECVFROMEX_H
-
+#ifndef ATOMICHELPERS_H
+#define	ATOMICHELPERS_H
 
 
-#include "unittest.h"
-
-class CTestRecvFromEx
-{
-public:
-    static HRESULT DoTest(bool fUseIPV6);
-};
-
-class CTestRecvFromExIPV4  : public IUnitTest
-{
-    HRESULT Run();
-    UT_DECLARE_TEST_NAME("CTestRecvFromEx(IPV4)");
-};
-
-class CTestRecvFromExIPV6  : public IUnitTest
-{
-    HRESULT Run();
-    UT_DECLARE_TEST_NAME("CTestRecvFromEx(IPV6)");
-};
+int AtomicIncrement(int* pInt);
+int AtomicDecrement(int* pInt);
 
 
-#endif
+#endif	/* ATOMICHELPERS_H */
+

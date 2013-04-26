@@ -15,7 +15,7 @@
 */
 
 
-#include "commonincludes.h"
+#include "commonincludes.hpp"
 #include "stuncore.h"
 
 #include "testdatastream.h"
@@ -32,6 +32,7 @@
 #include "prettyprint.h"
 #include "polling.h"
 #include "testpolling.h"
+#include "testatomichelpers.h"
 
 void ReaderFuzzTest()
 {
@@ -78,9 +79,11 @@ void RunUnitTests()
     boost::shared_ptr<CTestMessageHandler> spTestMessageHandler(new CTestMessageHandler);
     boost::shared_ptr<CTestCmdLineParser> spTestCmdLineParser(new CTestCmdLineParser);
     boost::shared_ptr<CTestClientLogic> spTestClientLogic(new CTestClientLogic);
-    boost::shared_ptr<CTestRecvFromEx> spTestRecvFromEx(new CTestRecvFromEx);
+    boost::shared_ptr<CTestRecvFromExIPV4> spTestRecvFromEx4(new CTestRecvFromExIPV4);
+    boost::shared_ptr<CTestRecvFromExIPV6> spTestRecvFromEx6(new CTestRecvFromExIPV6);
     boost::shared_ptr<CTestFastHash> spTestFastHash(new CTestFastHash);
     boost::shared_ptr<CTestPolling> spTestPolling(new CTestPolling);
+    boost::shared_ptr<CTestAtomicHelpers> spTestAtomicHelpers(new CTestAtomicHelpers);
 
     vecTests.push_back(spTestDataStream.get());
     vecTests.push_back(spTestReader.get());
@@ -89,9 +92,11 @@ void RunUnitTests()
     vecTests.push_back(spTestMessageHandler.get());
     vecTests.push_back(spTestCmdLineParser.get());
     vecTests.push_back(spTestClientLogic.get());
-    vecTests.push_back(spTestRecvFromEx.get());
+    vecTests.push_back(spTestRecvFromEx4.get());
+    vecTests.push_back(spTestRecvFromEx6.get());
     vecTests.push_back(spTestFastHash.get());
     vecTests.push_back(spTestPolling.get());
+    vecTests.push_back(spTestAtomicHelpers.get());
 
 
     for (size_t index = 0; index < vecTests.size(); index++)

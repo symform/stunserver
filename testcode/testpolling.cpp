@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#include "commonincludes.h"
+#include "commonincludes.hpp"
 #include "unittest.h"
 
 #include "polling.h"
@@ -405,3 +405,5 @@ Cleanup:
     return hr;
     
 }
+
+
